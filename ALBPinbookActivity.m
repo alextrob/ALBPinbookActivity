@@ -23,6 +23,16 @@ NSString *const ALBPinbookReadLaterParameterKey = @"readlater";
 
 @implementation ALBPinbookActivity
 
+- (id)initWithCallbackURL:(NSURL *)callbackURL;
+{
+    self = [super init];
+    if (self) {
+        self.callbackURL = callbackURL;
+        self.callbackSource = [[NSBundle mainBundle]objectForInfoDictionaryKey:@"CFBundleName"];
+    }
+    return self;
+}
+
 - (NSString *)activityType
 {
     return ALBActivityTypeSendToPinbook;
@@ -52,7 +62,12 @@ NSString *const ALBPinbookReadLaterParameterKey = @"readlater";
 {
     BOOL didFinish = NO;
     
-    NSMutableString *pinbookURLString = [NSMutableString stringWithFormat:@"pinbook:///add?url=%@", [self.activityURL absoluteString]];
+    NSMutableString *pinbookURLString = [NSMutableString stringWithFormat:
+                                         @"pinbook://x-callback-url/add?url=%@&x-source=%@&x-success=%@&x-cancel=%@",
+                                         [self.activityURL absoluteString],
+                                         [self.callbackSource stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                                         [self.callbackURL.absoluteString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
+                                         [self.callbackURL.absoluteString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     NSMutableArray *pathComponents = [NSMutableArray array];
     
     for (NSString *key in self.bookmarkParameters) {
