@@ -50,12 +50,23 @@ NSString *const ALBPinbookReadLaterParameterKey = @"readlater";
 
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems
 {
-    return activityItems.count == 1 && [[activityItems lastObject] isKindOfClass:[NSURL class]] && [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"pinbook:///"]];
+    // Check for a URL in any of the activity items.
+    for (id item in activityItems) {
+        if ([item isKindOfClass:[NSURL class]] && [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"pinbook://"]]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (void)prepareWithActivityItems:(NSArray *)activityItems
 {
-    self.activityURL = [activityItems lastObject];    
+    // Find the last URL in the activityItems array.
+    for (id item in activityItems) {
+        if ([item isKindOfClass:[NSURL class]] && [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"pinbook://"]]) {
+            self.activityURL = item;
+        }
+    }
 }
 
 - (void)performActivity
